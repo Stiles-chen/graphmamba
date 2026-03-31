@@ -1,0 +1,68 @@
+out_dir: results
+metric_best: ap
+wandb:
+  use: True
+  project: LRGB-Benchmark-RandomSeed
+  entity: project
+dataset:
+  format: OGB
+  name: peptides-functional
+  task: graph
+  task_type: classification_multilabel
+  transductive: False
+  node_encoder: True
+  node_encoder_name: Atom+LapPE
+  node_encoder_bn: False
+  edge_encoder: True
+  edge_encoder_name: Bond
+  edge_encoder_bn: False
+  split_mode: standard
+posenc_LapPE:
+  enable: True
+  eigen:
+    laplacian_norm: none
+    eigvec_norm: L2
+    max_freqs: 10
+  model: DeepSet
+  dim_pe: 16
+  layers: 2
+  raw_norm_type: none
+train:
+  mode: custom
+  batch_size: 128
+  eval_period: 1
+  ckpt_period: 100
+model:
+  type: HierarchicalGPSModel
+  loss_fun: cross_entropy
+  graph_pooling: mean
+gt:
+  layer_type: CustomGatedGCN+Mamba_Hybrid_Degree_Noise
+  layers: 6           # total GPS layers (3 fine + 3 coarse)
+  n_heads: 4
+  dim_hidden: 96      # must match gnn.dim_inner
+  dropout: 0.0
+  attn_dropout: 0.5
+  layer_norm: False
+  batch_norm: True
+  # Hierarchical MinCutPool settings
+  hier_pool_after_layer: 3    # insert MinCutPool after the first 3 layers
+  hier_num_clusters: 32       # K supernodes per graph (atoms → func. groups)
+  hier_pool_loss_weight: 0.1  # weight for mc_loss + o_loss
+gnn:
+  head: default
+  layers_pre_mp: 0
+  layers_post_mp: 1
+  dim_inner: 96       # must match gt.dim_hidden
+  batchnorm: True
+  act: relu
+  dropout: 0.0
+optim:
+  clip_grad_norm: True
+  optimizer: adamW
+  weight_decay: 0.01
+  base_lr: 0.001
+  max_epoch: 200
+  scheduler: cosine_with_warmup
+  num_warmup_epochs: 10
+seed: 0

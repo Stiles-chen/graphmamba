@@ -99,6 +99,10 @@ def train_epoch(logger, loader, model, optimizer, scheduler, batch_accumulation)
             _true = true.detach().to('cpu', non_blocking=True)
             _pred = pred_score.detach().to('cpu', non_blocking=True)
 
+        # Add auxiliary MinCut pool loss when using HierarchicalGPSModel
+        if cfg.gt.hier_pool_after_layer > 0 and getattr(model, 'pool_loss', None) is not None:
+            loss = loss + cfg.gt.hier_pool_loss_weight * model.pool_loss
+
         if if_flop:
             prof.stop_profile()
             flops = prof.get_total_flops()
