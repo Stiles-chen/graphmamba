@@ -3,13 +3,24 @@ import os
 import torch
 import logging
 
-# Compatibility shim: torch >= 2.4 removed torch.amp.custom_fwd / custom_bwd.
-# mamba_ssm 1.x relies on these attributes, so we restore them from
-# torch.cuda.amp which remains available across all supported PyTorch versions.
+# Compatibility shim for mamba_ssm 1.x which calls
+# torch.amp.custom_fwd(device_type='cuda') / torch.amp.custom_bwd(device_type='cuda').
+#
+# PyTorch < 2.0 : torch.amp has no custom_fwd / custom_bwd at all.
+# PyTorch 2.0-2.3: torch.amp.custom_fwd exists and accepts device_type.
+# PyTorch >= 2.4 : the attribute was removed from torch.amp.
+#
+# In all "missing" cases we provide thin wrappers around torch.cuda.amp
+# that silently ignore the device_type keyword so the call signature matches.
 if not hasattr(torch.amp, "custom_fwd"):
-    torch.amp.custom_fwd = torch.cuda.amp.custom_fwd
+    def _custom_fwd(func=None, **kwargs):
+        return torch.cuda.amp.custom_fwd(func)
+    torch.amp.custom_fwd = _custom_fwd
+
 if not hasattr(torch.amp, "custom_bwd"):
-    torch.amp.custom_bwd = torch.cuda.amp.custom_bwd
+    def _custom_bwd(func=None, **kwargs):
+        return torch.cuda.amp.custom_bwd(func)
+    torch.amp.custom_bwd = _custom_bwd
 
 import graphgps  # noqa, register custom modules
 from graphgps.optimizer.extra_optimizers import ExtendedSchedulerConfig
