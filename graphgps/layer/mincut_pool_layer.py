@@ -10,7 +10,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from torch_geometric.data import Batch
-from torch_geometric.nn.dense import mincut_pool
+from torch_geometric.nn.dense import dense_mincut_pool
 from torch_geometric.utils import to_dense_batch, to_dense_adj
 
 
@@ -19,7 +19,7 @@ class MinCutPoolLayer(nn.Module):
 
     Converts a fine-scale PyG sparse Batch into a coarser Batch by:
       1. Projecting node features to soft cluster assignments (S) via an MLP.
-      2. Applying PyG's ``mincut_pool`` to obtain pooled features & adjacency.
+      2. Applying PyG's ``dense_mincut_pool`` to obtain pooled features & adjacency.
       3. Rebuilding a sparse Batch from the pooled dense tensors.
 
     The returned auxiliary losses (mc_loss + o_loss) should be accumulated and
@@ -111,7 +111,7 @@ class MinCutPoolLayer(nn.Module):
         s = self.assignment_net(x_dense)  # [B, N_max, K]
 
         # 3. MinCutPool -------------------------------------------------------
-        x_pool, adj_pool, mc_loss, o_loss = mincut_pool(
+        x_pool, adj_pool, mc_loss, o_loss = dense_mincut_pool(
             x_dense, adj_dense, s, mask=node_mask
         )  # x_pool: [B, K, D], adj_pool: [B, K, K]
 
