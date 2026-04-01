@@ -3,6 +3,14 @@ import os
 import torch
 import logging
 
+# Compatibility shim: torch >= 2.4 removed torch.amp.custom_fwd / custom_bwd.
+# mamba_ssm 1.x relies on these attributes, so we restore them from
+# torch.cuda.amp which remains available across all supported PyTorch versions.
+if not hasattr(torch.amp, "custom_fwd"):
+    torch.amp.custom_fwd = torch.cuda.amp.custom_fwd
+if not hasattr(torch.amp, "custom_bwd"):
+    torch.amp.custom_bwd = torch.cuda.amp.custom_bwd
+
 import graphgps  # noqa, register custom modules
 from graphgps.optimizer.extra_optimizers import ExtendedSchedulerConfig
 
