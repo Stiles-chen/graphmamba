@@ -78,3 +78,13 @@ def set_cfg_gt(cfg):
     cfg.gt.bigbird.block_size = 3
 
     cfg.gt.bigbird.layer_norm_eps = 1e-6
+
+    # ---- Hierarchical MinCutPool options ------------------------------------
+    # Insert a MinCutPool layer after this many GPS layers (0 = disabled).
+    cfg.gt.hier_pool_after_layer = 0
+
+    # Number of supernodes K produced by the MinCutPool layer.
+    cfg.gt.hier_num_clusters = 32
+
+    # Weight applied to the auxiliary MinCut + Orthogonality losses.
+    cfg.gt.hier_pool_loss_weight = 0.1
