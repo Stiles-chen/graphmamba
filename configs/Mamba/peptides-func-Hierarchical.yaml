@@ -38,7 +38,7 @@ model:
   graph_pooling: mean
 gt:
   layer_type: CustomGatedGCN+Mamba_Hybrid_Degree_Noise
-  layers: 6           # total GPS layers (3 fine + 3 coarse)
+  layers: 4           # total GPS layers (2 fine + 2 coarse)
   n_heads: 4
   dim_hidden: 96      # must match gnn.dim_inner
   dropout: 0.0
@@ -46,7 +46,7 @@ gt:
   layer_norm: False
   batch_norm: True
   # Hierarchical MinCutPool settings
-  hier_pool_after_layer: 3    # insert MinCutPool after the first 3 layers
+  hier_pool_after_layer: 2    # insert MinCutPool after the first 2 layers
   hier_num_clusters: 32       # K supernodes per graph (atoms → func. groups)
   hier_pool_loss_weight: 0.1  # weight for mc_loss + o_loss
 gnn:
